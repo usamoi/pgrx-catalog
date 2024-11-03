@@ -1,8 +1,9 @@
 [package]
 name = "pgrx-catalog"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 description = "an out-of-tree version of pgrx catalog safe bindings"
+documentation = "https://docs.rs/pgrx-catalog"
 readmd = "README.md"
 repository = "https://github.com/usamoi/pgrx-catalog"
 license = "MIT"
@@ -11,6 +12,7 @@ include = ["src", "README.md"]
 [package.metadata.docs.rs]
 features = ["pg14"]
 targets = ["x86_64-unknown-linux-gnu"]
+rustc-args = ["--cfg", "docsrs"]
 
 [features]
 default = []
