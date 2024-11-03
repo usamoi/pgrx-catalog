@@ -2,6 +2,9 @@
 name = "pgrx-catalog"
 version = "0.0.1"
 edition = "2021"
+description = "an out-of-tree version of pgrx catalog safe bindings"
+readmd = "README.md"
+repository = "https://github.com/usamoi/pgrx-catalog"
 license = "MIT"
 include = ["src", "README.md"]
 
