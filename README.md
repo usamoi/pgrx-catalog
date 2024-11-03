@@ -1,3 +1,5 @@
 # pgrx-catalog
 
-It's an out-of-tree version of https://github.com/pgcentralfoundation/pgrx/pull/1545.
+An out-of-tree version of pgrx catalog safe bindings.
+
+See https://github.com/pgcentralfoundation/pgrx/pull/1545.

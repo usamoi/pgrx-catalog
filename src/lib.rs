@@ -32,7 +32,7 @@ impl<'a> GetStruct<&'a pg_sys::nameData> for &'a CStr {
 impl<'a> GetStruct<&'a pg_sys::int2vector> for &'a [i16] {
     unsafe fn get_struct(raw: &'a pg_sys::int2vector) -> Self {
         let len = raw.dim1;
-        // SAFETY: we trust `len` since it's passed from PostgreSQL and we cannot check it anyway
+        // SAFETY: we trust `len` since it's passed from PostgreSQL and we cannot check it anyway.
         unsafe { raw.values.as_slice(len as usize) }
     }
 }
@@ -41,7 +41,7 @@ impl<'a> GetStruct<&'a pg_sys::int2vector> for &'a [i16] {
 impl<'a> GetStruct<&'a pg_sys::oidvector> for &'a [Oid] {
     unsafe fn get_struct(raw: &'a pg_sys::oidvector) -> Self {
         let len = raw.dim1;
-        // SAFETY: we trust `len` since it's passed from PostgreSQL and we cannot check it anyway
+        // SAFETY: we trust `len` since it's passed from PostgreSQL and we cannot check it anyway.
         unsafe { raw.values.as_slice(len as usize) }
     }
 }
@@ -50,7 +50,7 @@ impl<'a> GetStruct<&'a pg_sys::oidvector> for &'a [Oid] {
 unsafe fn get_struct<T>(inner: &pg_sys::HeapTupleData) -> &T {
     debug_assert!(std::any::type_name::<T>().contains("FormData_"));
     unsafe {
-        // PostgreSQL macro `GETSTRUCT(tup)` expands to `((char *)((tup)->t_data) + (tup)->t_data->t_hoff)`
+        // PostgreSQL macro `GETSTRUCT(tup)` expands to `((char *)((tup)->t_data) + (tup)->t_data->t_hoff)`.
         let start = inner.t_data.cast::<u8>();
         let offset: u8 = (*inner.t_data).t_hoff;
         // So `s` is deferenced `GETSTRUCT(tup)`.
@@ -189,7 +189,7 @@ macro_rules! define_column {
                 pub fn $column(&self) -> $column_type {
                     unsafe {
                         let s = get_struct::<pg_sys::[<FormData_ $table>]>(self.inner);
-                        // SAFETY: we get `s` from PostgreSQL functions
+                        // SAFETY: we get `s` from PostgreSQL functions.
                         GetStruct::get_struct(&s.$column)
                     }
                 }
@@ -511,11 +511,11 @@ macro_rules! define_cache {
 define_catalog! {
     /// The catalog pg_am stores information about relation access methods. There is one row for each access method supported by the system. Currently, only tables and indexes have access methods.
     catalog (pg_am) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// Name of the access method
+        /// Name of the access method.
         (amname, &CStr, get_struct)
-        /// OID of a handler function that is responsible for supplying information about the access method
+        /// OID of a handler function that is responsible for supplying information about the access method.
         (amhandler, Regproc, get_struct)
         (amtype, PgAmAmtype, character {
             /// t = table (including materialized views)
@@ -529,28 +529,28 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_amop stores information about operators associated with access method operator families. There is one row for each operator that is a member of an operator family. A family member can be either a search operator or an ordering operator. An operator can appear in more than one family, but cannot appear in more than one search position nor more than one ordering position within a family. (It is allowed, though unlikely, for an operator to be used for both search and ordering purposes.)
     catalog (pg_amop) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// The operator family this entry is for
+        /// The operator family this entry is for.
         (amopfamily, Oid, get_struct)
-        /// Left-hand input data type of operator
+        /// Left-hand input data type of operator.
         (amoplefttype, Oid, get_struct)
-        /// Right-hand input data type of operator
+        /// Right-hand input data type of operator.
         (amoprighttype, Oid, get_struct)
-        /// Operator strategy number
+        /// Operator strategy number.
         (amopstrategy, i16, get_struct)
-        /// Operator purpose
+        /// Operator purpose.
         (amoppurpose, PgAmopAmoppurpose, character {
             /// s for search
             (Search, b's')
             /// o for ordering
             (Order, b'o')
         }, get_struct)
-        /// OID of the operator
+        /// OID of the operator.
         (amopopr, Oid, get_struct)
-        /// Index access method operator family is for
+        /// Index access method operator family is for.
         (amopmethod, Oid, get_struct)
-        /// The B-tree operator family this entry sorts according to, if an ordering operator; zero if a search operator
+        /// The B-tree operator family this entry sorts according to, if an ordering operator; zero if a search operator.
         (amopsortfamily, Oid, get_struct)
     }
 }
@@ -558,17 +558,17 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_amproc stores information about support functions associated with access method operator families. There is one row for each support function belonging to an operator family.
     catalog (pg_amproc) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// The operator family this entry is for
+        /// The operator family this entry is for.
         (amprocfamily, Oid, get_struct)
-        /// Left-hand input data type of associated operator
+        /// Left-hand input data type of associated operator.
         (amproclefttype, Oid, get_struct)
-        /// Right-hand input data type of associated operator
+        /// Right-hand input data type of associated operator.
         (amprocrighttype, Oid, get_struct)
-        /// Support function number
+        /// Support function number.
         (amprocnum, i16, get_struct)
-        /// OID of the function
+        /// OID of the function.
         (amproc, Regproc, get_struct)
     }
 }
@@ -576,33 +576,33 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_class describes tables and other objects that have columns or are otherwise similar to a table. This includes indexes, sequences, views, materialized views, composite types, and TOAST tables; see relkind. Below, when we mean all of these kinds of objects we speak of “relations”. Not all of pg_class's columns are meaningful for all relation kinds.
     catalog (pg_class) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
         /// Name of the table, index, view, etc.
         (relname, &CStr, get_struct)
-        /// The OID of the namespace that contains this relation
+        /// The OID of the namespace that contains this relation.
         (relnamespace, Oid, get_struct)
-        /// The OID of the data type that corresponds to this table's row type, if any; zero for indexes, sequences, and toast tables, which have no pg_type entry
+        /// The OID of the data type that corresponds to this table's row type, if any; zero for indexes, sequences, and toast tables, which have no pg_type entry.
         (reltype, Oid, get_struct)
-        /// For typed tables, the OID of the underlying composite type; zero for all other relations
+        /// For typed tables, the OID of the underlying composite type; zero for all other relations.
         (reloftype, Oid, get_struct)
-        /// Owner of the relation
+        /// Owner of the relation.
         (relowner, Oid, get_struct)
-        /// If this is a table or an index, the access method used (heap, B-tree, hash, etc.); otherwise zero (zero occurs for sequences, as well as relations without storage, such as views)
+        /// If this is a table or an index, the access method used (heap, B-tree, hash, etc.); otherwise zero (zero occurs for sequences, as well as relations without storage, such as views).
         (relam, Oid, get_struct)
-        /// Name of the on-disk file of this relation; zero means this is a “mapped” relation whose disk file name is determined by low-level state
+        /// Name of the on-disk file of this relation; zero means this is a “mapped” relation whose disk file name is determined by low-level state.
         (relfilenode, Oid, get_struct)
         /// The tablespace in which this relation is stored. If zero, the database's default tablespace is implied. (Not meaningful if the relation has no on-disk file.)
         (reltablespace, Oid, get_struct)
-        /// Size of the on-disk representation of this table in pages (of size BLCKSZ). This is only an estimate used by the planner. It is updated by VACUUM, ANALYZE, and a few DDL commands such as CREATE INDEX.
+        /// Size of the on-disk representation of this table in pages (of size BLCKSZ). This is only an estimate used by the planner. It is updated by VACUUM, ANALYZE, and a few DDL commands such as `CREATE INDEX`.
         (relpages, i32, get_struct)
-        /// Number of live rows in the table. This is only an estimate used by the planner. It is updated by VACUUM, ANALYZE, and a few DDL commands such as CREATE INDEX. If the table has never yet been vacuumed or analyzed, reltuples contains -1 indicating that the row count is unknown.
+        /// Number of live rows in the table. This is only an estimate used by the planner. It is updated by VACUUM, ANALYZE, and a few DDL commands such as `CREATE INDEX`. If the table has never yet been vacuumed or analyzed, reltuples contains -1 indicating that the row count is unknown.
         (reltuples, f32, get_struct)
-        /// Number of pages that are marked all-visible in the table's visibility map. This is only an estimate used by the planner. It is updated by VACUUM, ANALYZE, and a few DDL commands such as CREATE INDEX.
+        /// Number of pages that are marked all-visible in the table's visibility map. This is only an estimate used by the planner. It is updated by VACUUM, ANALYZE, and a few DDL commands such as `CREATE INDEX`.
         (relallvisible, i32, get_struct)
         /// OID of the TOAST table associated with this table, zero if none. The TOAST table stores large attributes “out of line” in a secondary table.
         (reltoastrelid, Oid, get_struct)
-        /// True if this is a table and it has (or recently had) any indexes
+        /// True if this is a table and it has (or recently had) any indexes.
         (relhasindex, bool, get_struct)
         /// True if this table is shared across all databases in the cluster. Only certain system catalogs (such as pg_database) are shared.
         (relisshared, bool, get_struct)
@@ -638,21 +638,21 @@ define_catalog! {
         }, get_struct)
         /// Number of user columns in the relation (system columns not counted). There must be this many corresponding entries in pg_attribute.
         (relnatts, i16, get_struct)
-        /// Number of CHECK constraints on the table
+        /// Number of `CHECK` constraints on the table.
         (relchecks, i16, get_struct)
-        /// True if table has (or once had) rules
+        /// True if table has (or once had) rules.
         (relhasrules, bool, get_struct)
-        /// True if table has (or once had) triggers
+        /// True if table has (or once had) triggers.
         (relhastriggers, bool, get_struct)
-        /// True if table or index has (or once had) any inheritance children or partitions
+        /// True if table or index has (or once had) any inheritance children or partitions.
         (relhassubclass, bool, get_struct)
-        /// True if table has row-level security enabled
+        /// True if table has row-level security enabled.
         (relrowsecurity, bool, get_struct)
-        /// True if row-level security (when enabled) will also apply to table owner
+        /// True if row-level security (when enabled) will also apply to table owner.
         (relforcerowsecurity, bool, get_struct)
-        /// True if relation is populated (this is true for all relations other than some materialized views)
+        /// True if relation is populated (this is true for all relations other than some materialized views).
         (relispopulated, bool, get_struct)
-        /// Columns used to form “replica identity” for rows
+        /// Columns used to form “replica identity” for rows.
         (relreplident, PgClassRelreplident, character {
             /// d = default (primary key, if any)
             (Default, b'd')
@@ -663,7 +663,7 @@ define_catalog! {
             /// i = index with indisreplident set (same as nothing if the index used has been dropped)
             (Index, b'i')
         }, get_struct)
-        /// True if table or index is a partition
+        /// True if table or index is a partition.
         (relispartition, bool, get_struct)
         /// For new relations being written during a DDL operation that requires a table rewrite, this contains the OID of the original relation; otherwise zero. That state is only visible internally; this field should never contain anything other than zero for a user-visible relation.
         (relrewrite, Oid, get_struct)
@@ -672,7 +672,7 @@ define_catalog! {
         /// All multixact IDs before this one have been replaced by a transaction ID in this table. This is used to track whether the table needs to be vacuumed in order to prevent multixact ID wraparound or to allow pg_multixact to be shrunk. Zero (InvalidMultiXactId) if the relation is not a table.
         (relminmxid, u32, get_struct)
         // (relacl, aclitem[], get_attr)
-        /// Access-method-specific options, as “keyword=value” strings
+        /// Access-method-specific options, as “keyword=value” strings.
         (reloptions, Array<String>, get_attr)
         // (relpartbound, pg_node_tree, get_attr)
     }
@@ -681,13 +681,13 @@ define_catalog! {
 define_catalog! {
     /// The pg_enum catalog contains entries showing the values and labels for each enum type. The internal representation of a given enum value is actually the OID of its associated row in pg_enum.
     catalog (pg_enum) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// The OID of the pg_type entry owning this enum value
+        /// The OID of the pg_type entry owning this enum value.
         (enumtypid, Oid, get_struct)
-        /// The sort position of this enum value within its enum type
+        /// The sort position of this enum value within its enum type.
         (enumsortorder, f32, get_struct)
-        /// The textual label for this enum value
+        /// The textual label for this enum value.
         (enumlabel, &CStr, get_struct)
     }
 }
@@ -695,36 +695,36 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_index contains part of the information about indexes. The rest is mostly in pg_class.
     catalog (pg_index) {
-        /// The OID of the pg_class entry for this index
+        /// The OID of the pg_class entry for this index.
         (indexrelid, Oid, get_struct)
-        /// The OID of the pg_class entry for the table this index is for
+        /// The OID of the pg_class entry for the table this index is for.
         (indrelid, Oid, get_struct)
-        /// The total number of columns in the index (duplicates pg_class.relnatts); this number includes both key and included attributes
+        /// The total number of columns in the index (duplicates pg_class.relnatts); this number includes both key and included attributes.
         (indnatts, i16, get_struct)
-        /// The number of key columns in the index, not counting any included columns, which are merely stored and do not participate in the index semantics
+        /// The number of key columns in the index, not counting any included columns, which are merely stored and do not participate in the index semantics.
         (indnkeyatts, i16, get_struct)
-        /// If true, this is a unique index
+        /// If true, this is a unique index.
         (indisunique, bool, get_struct)
-        #[cfg(not(any(feature = "pg12", feature = "pg13", feature = "pg14")))]
+        #[cfg(any(feature = "pg15", feature = "pg16", feature = "pg17"))]
         /// This value is only used for unique indexes. If false, this unique index will consider null values distinct (so the index can contain multiple null values in a column, the default PostgreSQL behavior). If it is true, it will consider null values to be equal (so the index can only contain one null value in a column).
         (indnullsnotdistinct, bool, get_struct)
-        /// If true, this index represents the primary key of the table (indisunique should always be true when this is true)
+        /// If true, this index represents the primary key of the table (indisunique should always be true when this is true).
         (indisprimary, bool, get_struct)
-        /// If true, this index supports an exclusion constraint
+        /// If true, this index supports an exclusion constraint.
         (indisexclusion, bool, get_struct)
-        /// If true, the uniqueness check is enforced immediately on insertion (irrelevant if indisunique is not true)
+        /// If true, the uniqueness check is enforced immediately on insertion (irrelevant if indisunique is not true).
         (indimmediate, bool, get_struct)
-        /// If true, the table was last clustered on this index
+        /// If true, the table was last clustered on this index.
         (indisclustered, bool, get_struct)
         /// If true, the index is currently valid for queries. False means the index is possibly incomplete: it must still be modified by INSERT/UPDATE operations, but it cannot safely be used for queries. If it is unique, the uniqueness property is not guaranteed true either.
         (indisvalid, bool, get_struct)
-        /// If true, queries must not use the index until the xmin of this pg_index row is below their TransactionXmin event horizon, because the table may contain broken HOT chains with incompatible rows that they can see
+        /// If true, queries must not use the index until the xmin of this pg_index row is below their TransactionXmin event horizon, because the table may contain broken HOT chains with incompatible rows that they can see.
         (indcheckxmin, bool, get_struct)
         /// If true, the index is currently ready for inserts. False means the index must be ignored by INSERT/UPDATE operations.
         (indisready, bool, get_struct)
-        /// If false, the index is in process of being dropped, and should be ignored for all purposes (including HOT-safety decisions)
+        /// If false, the index is in process of being dropped, and should be ignored for all purposes (including HOT-safety decisions).
         (indislive, bool, get_struct)
-        /// If true this index has been chosen as “replica identity” using ALTER TABLE ... REPLICA IDENTITY USING INDEX ...
+        /// If true this index has been chosen as “replica identity” using `ALTER TABLE ... REPLICA IDENTITY USING INDEX ...`.
         (indisreplident, bool, get_struct)
         /// This is an array of indnatts values that indicate which table columns this index indexes. For example, a value of 1 3 would mean that the first and the third table columns make up the index entries. Key columns come before non-key (included) columns. A zero in this array indicates that the corresponding index attribute is an expression over the table columns, rather than a simple column reference.
         (indkey, &[i16], get_struct)
@@ -742,11 +742,11 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_namespace stores namespaces. A namespace is the structure underlying SQL schemas: each namespace can have a separate collection of relations, types, etc. without name conflicts.
     catalog (pg_namespace) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// Name of the namespace
+        /// Name of the namespace.
         (nspname, &CStr, get_struct)
-        /// Owner of the namespace
+        /// Owner of the namespace.
         (nspowner, Oid, get_struct)
         // (nspacl, aclitem[], get_attr)
     }
@@ -755,23 +755,23 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_opclass defines index access method operator classes. Each operator class defines semantics for index columns of a particular data type and a particular index access method. An operator class essentially specifies that a particular operator family is applicable to a particular indexable column data type. The set of operators from the family that are actually usable with the indexed column are whichever ones accept the column's data type as their left-hand input.
     catalog (pg_opclass) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// Index access method operator class is for
+        /// Index access method operator class is for.
         (opcmethod, Oid, get_struct)
-        /// Name of this operator class
+        /// Name of this operator class.
         (opcname, &CStr, get_struct)
-        /// Namespace of this operator class
+        /// Namespace of this operator class.
         (opcnamespace, Oid, get_struct)
-        /// Owner of the operator class
+        /// Owner of the operator class.
         (opcowner, Oid, get_struct)
-        /// Operator family containing the operator class
+        /// Operator family containing the operator class.
         (opcfamily, Oid, get_struct)
-        /// Data type that the operator class indexes
+        /// Data type that the operator class indexes.
         (opcintype, Oid, get_struct)
-        /// True if this operator class is the default for opcintype
+        /// True if this operator class is the default for opcintype.
         (opcdefault, bool, get_struct)
-        /// Type of data stored in index, or zero if same as opcintype
+        /// Type of data stored in index, or zero if same as opcintype.
         (opckeytype, Oid, get_struct)
     }
 }
@@ -779,13 +779,13 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_operator stores information about operators.
     catalog (pg_operator) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// Name of the operator
+        /// Name of the operator.
         (oprname, &CStr, get_struct)
-        /// The OID of the namespace that contains this operator
+        /// The OID of the namespace that contains this operator.
         (oprnamespace, Oid, get_struct)
-        /// Owner of the operator
+        /// Owner of the operator.
         (oprowner, Oid, get_struct)
         (oprkind, PgOperatorOprkind, character {
             /// b = infix operator (“both”)
@@ -793,25 +793,25 @@ define_catalog! {
             /// l = prefix operator (“left”)
             (Prefix, b'l')
         }, get_struct)
-        /// This operator supports merge joins
+        /// This operator supports merge joins.
         (oprcanmerge, bool, get_struct)
-        /// This operator supports hash joins
+        /// This operator supports hash joins.
         (oprcanhash, bool, get_struct)
-        /// Type of the left operand (zero for a prefix operator)
+        /// Type of the left operand (zero for a prefix operator).
         (oprleft, Oid, get_struct)
         /// Type of the right operand
         (oprright, Oid, get_struct)
-        /// Type of the result (zero for a not-yet-defined “shell” operator)
+        /// Type of the result (zero for a not-yet-defined “shell” operator).
         (oprresult, Oid, get_struct)
-        /// Commutator of this operator (zero if none)
+        /// Commutator of this operator (zero if none).
         (oprcom, Oid, get_struct)
-        /// Negator of this operator (zero if none)
+        /// Negator of this operator (zero if none).
         (oprnegate, Oid, get_struct)
-        /// Function that implements this operator (zero for a not-yet-defined “shell” operator)
+        /// Function that implements this operator (zero for a not-yet-defined “shell” operator).
         (oprcode, Regproc, get_struct)
-        /// Restriction selectivity estimation function for this operator (zero if none)
+        /// Restriction selectivity estimation function for this operator (zero if none).
         (oprrest, Regproc, get_struct)
-        /// Join selectivity estimation function for this operator (zero if none)
+        /// Join selectivity estimation function for this operator (zero if none).
         (oprjoin, Regproc, get_struct)
     }
 }
@@ -819,15 +819,15 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_opfamily defines operator families. Each operator family is a collection of operators and associated support routines that implement the semantics specified for a particular index access method. Furthermore, the operators in a family are all “compatible”, in a way that is specified by the access method. The operator family concept allows cross-data-type operators to be used with indexes and to be reasoned about using knowledge of access method semantics.
     catalog (pg_opfamily) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// Index access method operator family is for
+        /// Index access method operator family is for.
         (opfmethod, Oid, get_struct)
-        /// Name of this operator family
+        /// Name of this operator family.
         (opfname, &CStr, get_struct)
-        /// Namespace of this operator family
+        /// Namespace of this operator family.
         (opfnamespace, Oid, get_struct)
-        /// Owner of the operator family
+        /// Owner of the operator family.
         (opfowner, Oid, get_struct)
     }
 }
@@ -835,23 +835,23 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_proc stores information about functions, procedures, aggregate functions, and window functions (collectively also known as routines).
     catalog (pg_proc) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// Name of the function
+        /// Name of the function.
         (proname, &CStr, get_struct)
-        /// The OID of the namespace that contains this function
+        /// The OID of the namespace that contains this function.
         (pronamespace, Oid, get_struct)
-        /// Owner of the function
+        /// Owner of the function.
         (proowner, Oid, get_struct)
-        /// Implementation language or call interface of this function
+        /// Implementation language or call interface of this function.
         (prolang, Oid, get_struct)
-        /// Estimated execution cost (in units of cpu_operator_cost); if proretset, this is cost per row returned
+        /// Estimated execution cost (in units of cpu_operator_cost); if proretset, this is cost per row returned.
         (procost, f32, get_struct)
-        /// Estimated number of result rows (zero if not proretset)
+        /// Estimated number of result rows (zero if not proretset).
         (prorows, f32, get_struct)
-        /// Data type of the variadic array parameter's elements, or zero if the function does not have a variadic parameter
+        /// Data type of the variadic array parameter's elements, or zero if the function does not have a variadic parameter.
         (provariadic, Oid, get_struct)
-        /// Planner support function for this function, or zero if none
+        /// Planner support function for this function, or zero if none.
         (prosupport, Regproc, get_struct)
         (prokind, PgProcProkind, character {
             /// f for a normal function
@@ -863,13 +863,13 @@ define_catalog! {
             /// w for a window function
             (Window, b'w')
         }, get_struct)
-        /// Function is a security definer (i.e., a “setuid” function)
+        /// Function is a security definer (i.e., a “setuid” function).
         (prosecdef, bool, get_struct)
         /// The function has no side effects. No information about the arguments is conveyed except via the return value. Any function that might throw an error depending on the values of its arguments is not leak-proof.
         (proleakproof, bool, get_struct)
         /// Function returns null if any call argument is null. In that case the function won't actually be called at all. Functions that are not “strict” must be prepared to handle null inputs.
         (proisstrict, bool, get_struct)
-        /// Function returns a set (i.e., multiple values of the specified data type)
+        /// Function returns a set (i.e., multiple values of the specified data type).
         (proretset, bool, get_struct)
         /// provolatile tells whether the function's result depends only on its input arguments, or is affected by outside factors.
         (provolatile, PgProcProvolatile, character {
@@ -889,11 +889,11 @@ define_catalog! {
             /// u for functions which are unsafe in parallel mode; the presence of such a function forces a serial execution plan
             (Unsafe, b'u')
         }, get_struct)
-        /// Number of input arguments
+        /// Number of input arguments.
         (pronargs, i16, get_struct)
-        /// Number of arguments that have defaults
+        /// Number of arguments that have defaults.
         (pronargdefaults, i16, get_struct)
-        /// Data type of the return value
+        /// Data type of the return value.
         (prorettype, Oid, get_struct)
         /// An array of the data types of the function arguments. This includes only input arguments (including INOUT and VARIADIC arguments), and thus represents the call signature of the function.
         (proargtypes, &[Oid], get_struct)
@@ -922,7 +922,7 @@ define_catalog! {
         /// Additional information about how to invoke the function. Again, the interpretation is language-specific.
         (probin, &str, get_attr)
         // (prosqlbody, pg_node_tree, get_attr)
-        /// Function's local settings for run-time configuration variables
+        /// Function's local settings for run-time configuration variables.
         (proconfig, Array<String>, get_attr)
         // (proacl, aclitem[], get_attr)
     }
@@ -931,13 +931,13 @@ define_catalog! {
 define_catalog! {
     /// The catalog pg_type stores information about data types. Base types and enum types (scalar types) are created with CREATE TYPE, and domains with CREATE DOMAIN. A composite type is automatically created for each table in the database, to represent the row structure of the table. It is also possible to create composite types with CREATE TYPE AS.
     catalog (pg_type) {
-        /// Row identifier
+        /// Row identifier.
         (oid, Oid, get_struct)
-        /// Data type name
+        /// Data type name.
         (typname, &CStr, get_struct)
-        /// The OID of the namespace that contains this type
+        /// The OID of the namespace that contains this type.
         (typnamespace, Oid, get_struct)
-        /// Owner of the type
+        /// Owner of the type.
         (typowner, Oid, get_struct)
         /// For a fixed-size type, typlen is the number of bytes in the internal representation of the type. But for a variable-length type, typlen is negative. -1 indicates a “varlena” type (one that has a length word), -2 indicates a null-terminated C string.
         (typlen, i16, get_struct)
@@ -995,7 +995,7 @@ define_catalog! {
             /// Internal-use types
             (Internal, b'Z')
         }, get_struct)
-        /// True if the type is a preferred cast target within its typcategory
+        /// True if the type is a preferred cast target within its typcategory.
         (typispreferred, bool, get_struct)
         /// True if the type is defined, false if this is a placeholder entry for a not-yet-defined type. When typisdefined is false, nothing except the type name, namespace, and OID can be relied on.
         (typisdefined, bool, get_struct)
@@ -1003,26 +1003,26 @@ define_catalog! {
         (typdelim, c_char, get_struct)
         /// If this is a composite type (see typtype), then this column points to the pg_class entry that defines the corresponding table. (For a free-standing composite type, the pg_class entry doesn't really represent a table, but it is needed anyway for the type's pg_attribute entries to link to.) Zero for non-composite types.
         (typrelid, Oid, get_struct)
-        #[cfg(not(any(feature = "pg12", feature = "pg13")))]
+        #[cfg(any(feature = "pg14", feature = "pg15", feature = "pg16", feature = "pg17"))]
         /// Subscripting handler function's OID, or zero if this type doesn't support subscripting. Types that are “true” array types have typsubscript = array_subscript_handler, but other types may have other handler functions to implement specialized subscripting behavior.
         (typsubscript, Regproc, get_struct)
         /// If typelem is not zero then it identifies another row in pg_type, defining the type yielded by subscripting. This should be zero if typsubscript is zero. However, it can be zero when typsubscript isn't zero, if the handler doesn't need typelem to determine the subscripting result type. Note that a typelem dependency is considered to imply physical containment of the element type in this type; so DDL changes on the element type might be restricted by the presence of this type.
         (typelem, Oid, get_struct)
-        /// If typarray is not zero then it identifies another row in pg_type, which is the “true” array type having this type as element
+        /// If typarray is not zero then it identifies another row in pg_type, which is the “true” array type having this type as element.
         (typarray, Oid, get_struct)
-        /// Input conversion function (text format)
+        /// Input conversion function (text format).
         (typinput, Regproc, get_struct)
-        /// Output conversion function (text format)
+        /// Output conversion function (text format).
         (typoutput, Regproc, get_struct)
-        /// Input conversion function (binary format), or zero if none
+        /// Input conversion function (binary format), or zero if none.
         (typreceive, Regproc, get_struct)
-        /// Output conversion function (binary format), or zero if none
+        /// Output conversion function (binary format), or zero if none.
         (typsend, Regproc, get_struct)
-        /// Type modifier input function, or zero if type does not support modifiers
+        /// Type modifier input function, or zero if type does not support modifiers.
         (typmodin, Regproc, get_struct)
-        /// Type modifier output function, or zero to use the standard format
+        /// Type modifier output function, or zero to use the standard format.
         (typmodout, Regproc, get_struct)
-        /// Custom ANALYZE function, or zero to use the standard function
+        /// Custom ANALYZE function, or zero to use the standard function.
         (typanalyze, Regproc, get_struct)
         /// typalign is the alignment required when storing a value of this type. It applies to storage on disk as well as most representations of the value inside PostgreSQL. When multiple values are stored consecutively, such as in the representation of a complete row on disk, padding is inserted before a datum of this type so that it begins on the specified boundary. The alignment reference is the beginning of the first datum in the sequence.
         (typalign, PgTypeTypalign, character {
