@@ -1,7 +1,7 @@
 [package]
 name = "pgrx_catalog_test"
 version = "0.0.0"
-edition = "2021"
+edition = "2024"
 publish = false
 
 [lib]
@@ -23,8 +23,8 @@ pg17 = ["pgrx/pg17", "pgrx-tests/pg17"]
 pg_test = []
 
 [dependencies]
-pgrx = "~0.12"
+pgrx = ">=0.12, <0.14"
 pgrx-catalog = { path = "../" }
 
 [dev-dependencies]
-pgrx-tests = "~0.12"
+pgrx-tests = ">=0.12, <0.14"
