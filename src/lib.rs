@@ -2,7 +2,7 @@ use pg_sys::Oid as Regproc;
 use pg_sys::Oid;
 use pgrx::datum::Array;
 use pgrx::pg_sys;
-use std::ffi::{c_char, CStr};
+use std::ffi::{CStr, c_char};
 use std::ptr::NonNull;
 
 trait GetStruct<T> {
@@ -668,9 +668,9 @@ define_catalog! {
         /// For new relations being written during a DDL operation that requires a table rewrite, this contains the OID of the original relation; otherwise zero. That state is only visible internally; this field should never contain anything other than zero for a user-visible relation.
         (relrewrite, Oid, get_struct)
         /// All transaction IDs before this one have been replaced with a permanent (“frozen”) transaction ID in this table. This is used to track whether the table needs to be vacuumed in order to prevent transaction ID wraparound or to allow pg_xact to be shrunk. Zero (InvalidTransactionId) if the relation is not a table.
-        (relfrozenxid, u32, get_struct)
+        (relfrozenxid, pg_sys::TransactionId, get_struct)
         /// All multixact IDs before this one have been replaced by a transaction ID in this table. This is used to track whether the table needs to be vacuumed in order to prevent multixact ID wraparound or to allow pg_multixact to be shrunk. Zero (InvalidMultiXactId) if the relation is not a table.
-        (relminmxid, u32, get_struct)
+        (relminmxid, pg_sys::TransactionId, get_struct)
         // (relacl, aclitem[], get_attr)
         /// Access-method-specific options, as “keyword=value” strings.
         (reloptions, Array<String>, get_attr)

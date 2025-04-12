@@ -13,8 +13,8 @@ pub mod pg_test {
 #[cfg(any(test, feature = "pg_test"))]
 #[pgrx::pg_schema]
 mod tests {
-    use pgrx::pg_test;
     use pgrx::pg_sys::Oid;
+    use pgrx::pg_test;
     use pgrx_catalog::*;
     use std::ffi::CString;
 

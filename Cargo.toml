@@ -1,6 +1,6 @@
 [package]
 name = "pgrx-catalog"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 description = "An out-of-tree version of pgrx catalog safe bindings"
 documentation = "https://docs.rs/pgrx-catalog"
@@ -16,7 +16,6 @@ rustc-args = ["--cfg", "docsrs"]
 
 [features]
 default = []
-pg12 = ["pgrx/pg12"]
 pg13 = ["pgrx/pg13"]
 pg14 = ["pgrx/pg14"]
 pg15 = ["pgrx/pg15"]
@@ -24,5 +23,5 @@ pg16 = ["pgrx/pg16"]
 pg17 = ["pgrx/pg17"]
 
 [dependencies]
-pgrx = { version = ">=0.12, <0.14", default-features = false }
+pgrx = { version = ">=0.14, <0.15", default-features = false }
 paste = "1.0.15"
