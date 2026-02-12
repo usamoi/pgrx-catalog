@@ -251,7 +251,7 @@ macro_rules! define_catalog {
                     self.inner.is_none()
                 }
                 /// Get the search result.
-                pub fn get(&self) -> Option<[<$table:camel>]> {
+                pub fn get(&self) -> Option<[<$table:camel>]<'_>> {
                     unsafe {
                         Some([<$table:camel>] {
                             inner: self.inner?.as_ref(),
@@ -289,7 +289,7 @@ macro_rules! define_catalog {
                     self.len() == 0
                 }
                 /// Get the `i`-th search result.
-                pub fn get(&self, i: usize) -> Option<[<$table:camel>]> {
+                pub fn get(&self, i: usize) -> Option<[<$table:camel>]<'_>> {
                     unsafe {
                         Some([<$table:camel>] {
                             inner: syscache_get(self.inner, i)?,
@@ -673,7 +673,7 @@ define_catalog! {
         (relminmxid, pg_sys::TransactionId, get_struct)
         // (relacl, aclitem[], get_attr)
         /// Access-method-specific options, as “keyword=value” strings.
-        (reloptions, Array<String>, get_attr)
+        (reloptions, Array<'_, String>, get_attr)
         // (relpartbound, pg_node_tree, get_attr)
     }
 }
@@ -729,11 +729,11 @@ define_catalog! {
         /// This is an array of indnatts values that indicate which table columns this index indexes. For example, a value of 1 3 would mean that the first and the third table columns make up the index entries. Key columns come before non-key (included) columns. A zero in this array indicates that the corresponding index attribute is an expression over the table columns, rather than a simple column reference.
         (indkey, &[i16], get_struct)
         /// For each column in the index key (indnkeyatts values), this contains the OID of the collation to use for the index, or zero if the column is not of a collatable data type.
-        (indcollation, Array<Oid>, get_attr_notnull)
+        (indcollation, Array<'_, Oid>, get_attr_notnull)
         /// For each column in the index key (indnkeyatts values), this contains the OID of the operator class to use. See pg_opclass for details.
-        (indclass, Array<Oid>, get_attr_notnull)
+        (indclass, Array<'_, Oid>, get_attr_notnull)
         /// This is an array of indnkeyatts values that store per-column flag bits. The meaning of the bits is defined by the index's access method.
-        (indoption, Array<i16>, get_attr_notnull)
+        (indoption, Array<'_, i16>, get_attr_notnull)
         // (indexprs, pg_node_tree, get_attr)
         // (indpred, pg_node_tree, get_attr)
     }
@@ -898,9 +898,9 @@ define_catalog! {
         /// An array of the data types of the function arguments. This includes only input arguments (including INOUT and VARIADIC arguments), and thus represents the call signature of the function.
         (proargtypes, &[Oid], get_struct)
         /// An array of the data types of the function arguments. This includes all arguments (including OUT and INOUT arguments); however, if all the arguments are IN arguments, this field will be null. Note that subscripting is 1-based, whereas for historical reasons proargtypes is subscripted from 0.
-        (proallargtypes, Array<Oid>, get_attr)
+        (proallargtypes, Array<'_, Oid>, get_attr)
         /// An array of the modes of the function arguments. If all the arguments are IN arguments, this field will be null. Note that subscripts correspond to positions of proallargtypes not proargtypes.
-        (proargmodes, Array<PgProcProargmodes>, character {
+        (proargmodes, Array<'_, PgProcProargmodes>, character {
             /// i for IN arguments
             (In, b'i')
             /// o for OUT arguments
@@ -913,17 +913,17 @@ define_catalog! {
             (Table, b't')
         }, get_attr)
         /// An array of the names of the function arguments. Arguments without a name are set to empty strings in the array. If none of the arguments have a name, this field will be null. Note that subscripts correspond to positions of proallargtypes not proargtypes.
-        (proargnames, Array<String>, get_attr)
+        (proargnames, Array<'_, String>, get_attr)
         // (proargdefaults, pg_node_tree, get_attr)
         /// An array of the argument/result data type(s) for which to apply transforms (from the function's TRANSFORM clause). Null if none.
-        (protrftypes, Array<Oid>, get_attr)
+        (protrftypes, Array<'_, Oid>, get_attr)
         /// This tells the function handler how to invoke the function. It might be the actual source code of the function for interpreted languages, a link symbol, a file name, or just about anything else, depending on the implementation language/call convention.
         (prosrc, &str, get_attr_notnull)
         /// Additional information about how to invoke the function. Again, the interpretation is language-specific.
         (probin, &str, get_attr)
         // (prosqlbody, pg_node_tree, get_attr)
         /// Function's local settings for run-time configuration variables.
-        (proconfig, Array<String>, get_attr)
+        (proconfig, Array<'_, String>, get_attr)
         // (proacl, aclitem[], get_attr)
     }
 }
