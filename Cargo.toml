@@ -1,6 +1,6 @@
 [package]
 name = "pgrx-catalog"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2024"
 description = "An out-of-tree version of pgrx catalog safe bindings"
 documentation = "https://docs.rs/pgrx-catalog"
@@ -22,7 +22,8 @@ pg15 = ["pgrx/pg15"]
 pg16 = ["pgrx/pg16"]
 pg17 = ["pgrx/pg17"]
 pg18 = ["pgrx/pg18"]
+pg19 = ["pgrx/pg19"]
 
 [dependencies]
-pgrx = { version = ">=0.15, <0.18", default-features = false }
+pgrx = { version = ">=0.19, <0.20", default-features = false }
 paste = "1.0.15"

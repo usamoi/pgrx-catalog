@@ -5,12 +5,7 @@ edition = "2024"
 publish = false
 
 [lib]
-crate-type = ["lib", "cdylib"]
-
-[[bin]]
-name = "pgrx_embed_pgrx_catalog_test"
-path = "./src/bin/pgrx_embed.rs"
-required-features = ["pg_test"]
+crate-type = ["cdylib"]
 
 [features]
 default = []
@@ -20,11 +15,12 @@ pg15 = ["pgrx/pg15", "pgrx-tests/pg15"]
 pg16 = ["pgrx/pg16", "pgrx-tests/pg16"]
 pg17 = ["pgrx/pg17", "pgrx-tests/pg17"]
 pg18 = ["pgrx/pg18", "pgrx-tests/pg18"]
+pg19 = ["pgrx/pg19", "pgrx-tests/pg19"]
 pg_test = []
 
 [dependencies]
-pgrx = ">=0.15, <0.18"
+pgrx = ">=0.19, <0.20"
 pgrx-catalog = { path = "../" }
 
 [dev-dependencies]
-pgrx-tests = ">=0.15, <0.18"
+pgrx-tests = ">=0.19, <0.20"
